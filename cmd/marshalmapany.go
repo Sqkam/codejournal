@@ -8,7 +8,13 @@ import (
 
 func main() {
 	kk := `{
-"k":"v",
+    "a": 1,
+    "b": {
+        "c": 2,
+        "d": {
+            "e": 3,
+            "f": [4, 5, 6]
+        }},
     "inbounds": [ 
         {
             "listen": "0.0.0.0",
@@ -52,59 +58,35 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%v\n", err)
-
 	marshalMapAny(data, "")
-
 }
 
-func marshalKV() {
-
-}
 func marshalMapAny(data interface{}, prefix string) {
 	switch t := data.(type) {
 	case map[string]interface{}:
 		for key, value := range t {
-			//fmt.Printf("%v\n", key)
-			//fmt.Printf("%v\n", value)
 			var newKey string
 			if prefix != "" {
-				newKey = prefix + "." + key + "."
+				newKey = prefix + "." + key
 			} else {
-				newKey = key + "."
-			}
-
-			switch value.(type) {
-			case string:
-				fmt.Printf("%s:%s\n", newKey, value)
-			case bool:
-				fmt.Printf("%s:%b\n", newKey, value)
-			case float32:
-				fmt.Printf("%s:%f\n", newKey, value)
-			case float64:
-				fmt.Printf("%s:%f\n", newKey, value)
-			case int:
-				fmt.Printf("%s:%d\n", newKey, value)
-			case int32:
-				fmt.Printf("%s:%d\n", newKey, value)
-			case int64:
-				fmt.Printf("%s:%d\n", newKey, value)
-			default:
-				marshalMapAny(value, newKey)
-			}
-		}
-	case []interface{}:
-		for index, value := range t {
-
-			var newKey string
-			if prefix != "" {
-				newKey = prefix + "[" + fmt.Sprintf("%d", index) + "]."
-			} else {
-				newKey = "[" + fmt.Sprintf("%d", index) + "]."
+				newKey = key
 			}
 
 			marshalMapAny(value, newKey)
+
 		}
+	case []interface{}:
+		for index, value := range t {
+			var newKey string
+			if prefix != "" {
+				newKey = prefix + ".[" + fmt.Sprintf("%d", index) + "]"
+			} else {
+				newKey = "[" + fmt.Sprintf("%d", index) + "]"
+			}
+			marshalMapAny(value, newKey)
+		}
+	case string, bool, float64:
+		fmt.Printf("%s=%v\n", prefix, t)
 	default:
 		panic(errors.New("unknown type"))
 	}

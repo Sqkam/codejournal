@@ -40,14 +40,11 @@ func main() {
 	switchCase()
 	judgeNilSlice(nil)
 }
-func switchCase() {
-	_, _ = connectDB(DBType("mysql"), "")
-}
+
 func judgeNilSlice(ls []string) bool {
 	return len(ls) == 0
 }
-func operateSlice(ls []string) []string {
-
+func operateSliceByAppend(ls []string) []string {
 	tableList := make([]string, 0, len(ls))
 	for _, tableName := range ls {
 		_tableName := strings.TrimSpace(tableName) // trim leading and trailing space in tableName
@@ -60,7 +57,7 @@ func operateSlice(ls []string) []string {
 	return tableList
 
 }
-func operateSlice2(ls []string) []interface{} {
+func operateSliceByAddr(ls []string) []interface{} {
 	tableList := make([]interface{}, len(ls))
 	for i, tableName := range ls {
 		tableList[i] = tableName
@@ -73,11 +70,14 @@ func createStruct() {
 	fmt.Printf("%+v\n", cmdParse)
 }
 
+func switchCase() {
+	_, _ = connectDB(DBType("mysql"), "")
+}
+
 func connectDB(t DBType, dsn string) (*gorm.DB, error) {
 	if dsn == "" {
 		return nil, fmt.Errorf("dsn cannot be empty")
 	}
-
 	switch t {
 	case dbMySQL:
 		return nil, nil
