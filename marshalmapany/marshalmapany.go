@@ -63,6 +63,7 @@ func main() {
 }
 
 func MarshalMapAny(data interface{}, prefix string) {
+	//parse no ptr
 	switch t := data.(type) {
 	case map[string]interface{}:
 		for key, value := range t {
@@ -80,7 +81,7 @@ func MarshalMapAny(data interface{}, prefix string) {
 		for index, value := range t {
 			var newKey string
 			if prefix != "" {
-				newKey = prefix + ".[" + fmt.Sprintf("%d", index) + "]"
+				newKey = prefix + "[" + fmt.Sprintf("%d", index) + "]"
 			} else {
 				newKey = "[" + fmt.Sprintf("%d", index) + "]"
 			}
