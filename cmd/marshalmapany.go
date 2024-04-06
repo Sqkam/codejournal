@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
 func main() {
 	kk := `{
+"k":"v",
     "inbounds": [ 
         {
             "listen": "0.0.0.0",
@@ -45,33 +47,65 @@ func main() {
         }
     ]
 }`
-	marshalMapAny(kk)
+	var data interface{}
+	err := json.Unmarshal([]byte(kk), &data)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%v\n", err)
+
+	marshalMapAny(data, "")
 
 }
 
 func marshalKV() {
 
 }
-func marshalMapAny(data string) {
-	result := make(map[string]interface{})
-	err := json.Unmarshal([]byte(data), &result)
-	fmt.Printf("%v\n", err)
-	fmt.Printf("%v\n", result)
-	for i, v := range result {
-		fmt.Printf("%v\n", i)
-		fmt.Printf("%v\n", v)
-	}
-	inbounds, ok := result["inbounds"]
-	fmt.Printf("%v\n", inbounds)
-	fmt.Printf("%v\n", ok)
-	switch inbounds.(type) {
-	case []interface{}:
-		a := inbounds.([]interface{})
-		fmt.Println(a[0]) //
+func marshalMapAny(data interface{}, prefix string) {
+	switch t := data.(type) {
 	case map[string]interface{}:
-		m := inbounds.(map[string]interface{})
-		fmt.Println(m["name"]) // John Doe
-		fmt.Println(m["age"])  // 30
-	}
+		for key, value := range t {
+			//fmt.Printf("%v\n", key)
+			//fmt.Printf("%v\n", value)
+			var newKey string
+			if prefix != "" {
+				newKey = prefix + "." + key + "."
+			} else {
+				newKey = key + "."
+			}
 
+			switch value.(type) {
+			case string:
+				fmt.Printf("%s:%s\n", newKey, value)
+			case bool:
+				fmt.Printf("%s:%b\n", newKey, value)
+			case float32:
+				fmt.Printf("%s:%f\n", newKey, value)
+			case float64:
+				fmt.Printf("%s:%f\n", newKey, value)
+			case int:
+				fmt.Printf("%s:%d\n", newKey, value)
+			case int32:
+				fmt.Printf("%s:%d\n", newKey, value)
+			case int64:
+				fmt.Printf("%s:%d\n", newKey, value)
+			default:
+				marshalMapAny(value, newKey)
+			}
+		}
+	case []interface{}:
+		for index, value := range t {
+
+			var newKey string
+			if prefix != "" {
+				newKey = prefix + "[" + fmt.Sprintf("%d", index) + "]."
+			} else {
+				newKey = "[" + fmt.Sprintf("%d", index) + "]."
+			}
+
+			marshalMapAny(value, newKey)
+		}
+	default:
+		panic(errors.New("unknown type"))
+	}
 }
